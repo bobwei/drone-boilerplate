@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  drone-server:
+    image: drone/drone:0.7
+    ports:
+      - 8000:8000
+    volumes:
+      - data-volume:/var/lib/drone/
+    restart: always
+    env_file: .env
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  drone-agent:
+    image: drone/drone:0.7
+    command: agent
+    restart: always
+    depends_on:
+      - drone-server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file: .env
+    deploy:
+      replicas: 24
+      placement:
+        constraints:
+          - node.role == manager
+
+volumes:
+  data-volume:
